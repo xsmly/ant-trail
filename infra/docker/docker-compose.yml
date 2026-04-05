@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  # PostgreSQL database (for production-like setup)
+  db:
+    image: postgres:16-alpine
+    container_name: anttrail-db
+    environment:
+      POSTGRES_DB: anttrail
+      POSTGRES_USER: anttrail
+      POSTGRES_PASSWORD: anttrail_secret
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U anttrail"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Next.js web application
+  web:
+    build:
+      context: ../../apps/web
+      dockerfile: ../../infra/docker/Dockerfile.web
+    container_name: anttrail-web
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "postgresql://anttrail:anttrail_secret@db:5432/anttrail"
+      JWT_SECRET: "change-this-in-production"
+      NEXT_PUBLIC_APP_NAME: "Ant Trail"
+      NODE_ENV: production
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # Python analytics service (optional)
+  analytics:
+    build:
+      context: ../../apps/analytics
+      dockerfile: ../../infra/docker/Dockerfile.analytics
+    container_name: anttrail-analytics
+    ports:
+      - "8001:8001"
+    environment:
+      DATABASE_URL: "postgresql://anttrail:anttrail_secret@db:5432/anttrail"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

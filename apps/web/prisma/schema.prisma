@@ -1,0 +1,156 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Region {
+  id           Int      @id @default(autoincrement())
+  province     String
+  cityRegency  String   @map("city_regency")
+  regionType   String   @map("region_type") // kota, kabupaten
+  latitude     Float
+  longitude    Float
+  islandGroup  String   @map("island_group") // Jawa, Sumatera, Kalimantan, dll
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  priceObservations     PriceObservation[]
+  supplyDemandSnapshots SupplyDemandSnapshot[]
+  sourceRoutes          LogisticsRoute[]       @relation("SourceRegion")
+  destRoutes            LogisticsRoute[]       @relation("DestRegion")
+  inflationSignals      InflationSignal[]
+  policyInterventions   PolicyIntervention[]
+  users                 User[]
+
+  @@map("regions")
+}
+
+model Commodity {
+  id       Int    @id @default(autoincrement())
+  name     String @unique
+  category String // pokok, bumbu, minyak, gula
+  unit     String // kg, liter
+
+  priceObservations     PriceObservation[]
+  supplyDemandSnapshots SupplyDemandSnapshot[]
+  logisticsRoutes       LogisticsRoute[]
+  inflationSignals      InflationSignal[]
+
+  @@map("commodities")
+}
+
+model PriceObservation {
+  id              Int      @id @default(autoincrement())
+  regionId        Int      @map("region_id")
+  commodityId     Int      @map("commodity_id")
+  observationDate DateTime @map("observation_date")
+  price           Float
+  source          String   @default("seed")
+
+  region    Region    @relation(fields: [regionId], references: [id])
+  commodity Commodity @relation(fields: [commodityId], references: [id])
+
+  @@index([regionId, commodityId, observationDate])
+  @@map("price_observations")
+}
+
+model SupplyDemandSnapshot {
+  id              Int      @id @default(autoincrement())
+  regionId        Int      @map("region_id")
+  commodityId     Int      @map("commodity_id")
+  snapshotDate    DateTime @map("snapshot_date")
+  estimatedSupply Float    @map("estimated_supply")
+  estimatedDemand Float    @map("estimated_demand")
+  gap             Float
+  status          String   // surplus, deficit, balanced
+
+  region    Region    @relation(fields: [regionId], references: [id])
+  commodity Commodity @relation(fields: [commodityId], references: [id])
+
+  @@index([regionId, commodityId, snapshotDate])
+  @@map("supply_demand_snapshots")
+}
+
+model LogisticsRoute {
+  id                   Int    @id @default(autoincrement())
+  sourceRegionId       Int    @map("source_region_id")
+  destinationRegionId  Int    @map("destination_region_id")
+  commodityId          Int    @map("commodity_id")
+  routeScore           Float  @map("route_score")
+  distanceScore        Float  @map("distance_score")
+  capacityScore        Float  @map("capacity_score")
+  urgencyScore         Float  @map("urgency_score")
+  finalScore           Float  @map("final_score")
+  recommendationReason String @map("recommendation_reason")
+  createdAt            DateTime @default(now()) @map("created_at")
+
+  sourceRegion      Region    @relation("SourceRegion", fields: [sourceRegionId], references: [id])
+  destinationRegion Region    @relation("DestRegion", fields: [destinationRegionId], references: [id])
+  commodity         Commodity @relation(fields: [commodityId], references: [id])
+
+  @@index([commodityId, sourceRegionId])
+  @@map("logistics_routes")
+}
+
+model InflationSignal {
+  id           Int      @id @default(autoincrement())
+  regionId     Int      @map("region_id")
+  commodityId  Int      @map("commodity_id")
+  signalDate   DateTime @map("signal_date")
+  currentPrice Float    @map("current_price")
+  forecastPrice Float   @map("forecast_price")
+  riskLevel    String   @map("risk_level") // low, medium, high
+  signalReason String   @map("signal_reason")
+
+  region    Region    @relation(fields: [regionId], references: [id])
+  commodity Commodity @relation(fields: [commodityId], references: [id])
+
+  @@index([regionId, commodityId, signalDate])
+  @@map("inflation_signals")
+}
+
+model PolicyIntervention {
+  id                 Int    @id @default(autoincrement())
+  regionId           Int    @map("region_id")
+  title              String
+  category           String // operasi_pasar, subsidi_distribusi, monitoring_stok, kerja_sama
+  summary            String
+  effectivenessScore Float  @map("effectiveness_score")
+  sourceUrl          String @default("") @map("source_url")
+  tags               String // comma-separated
+  createdAt          DateTime @default(now()) @map("created_at")
+
+  region Region @relation(fields: [regionId], references: [id])
+
+  @@index([regionId, category])
+  @@map("policy_interventions")
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  name         String
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  role         String   // super_admin, analyst, pemda_viewer
+  regionId     Int?     @map("region_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  region Region? @relation(fields: [regionId], references: [id])
+
+  @@map("users")
+}
+
+model IngestionJob {
+  id         Int       @id @default(autoincrement())
+  sourceName String    @map("source_name")
+  status     String    // pending, running, completed, failed
+  startedAt  DateTime  @default(now()) @map("started_at")
+  finishedAt DateTime? @map("finished_at")
+  rowCount   Int       @default(0) @map("row_count")
+  errorLog   String?   @map("error_log")
+
+  @@map("ingestion_jobs")
+}

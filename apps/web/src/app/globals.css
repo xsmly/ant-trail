@@ -1,0 +1,110 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@layer base {
+  :root {
+    --background: 250 250 250;
+    --foreground: 15 23 42;
+    --card: 255 255 255;
+    --primary: 22 163 74;
+    --primary-light: 220 252 231;
+    --border: 226 232 240;
+    --muted: 100 116 139;
+    --danger: 239 68 68;
+    --warning: 234 179 8;
+    --success: 34 197 94;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer components {
+  .dashboard-card {
+    @apply bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow;
+  }
+
+  .kpi-card {
+    @apply dashboard-card p-5;
+  }
+
+  .status-safe {
+    @apply text-green-700 bg-green-50 border-green-200;
+  }
+
+  .status-warning {
+    @apply text-yellow-700 bg-yellow-50 border-yellow-200;
+  }
+
+  .status-danger {
+    @apply text-red-700 bg-red-50 border-red-200;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-safe {
+    @apply badge bg-green-100 text-green-800;
+  }
+
+  .badge-warning {
+    @apply badge bg-yellow-100 text-yellow-800;
+  }
+
+  .badge-danger {
+    @apply badge bg-red-100 text-red-800;
+  }
+
+  .input-field {
+    @apply w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all;
+  }
+
+  .btn-primary {
+    @apply bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50;
+  }
+
+  .btn-secondary {
+    @apply bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2 px-4 rounded-lg transition-colors;
+  }
+
+  .btn-danger {
+    @apply bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors;
+  }
+
+  .table-header {
+    @apply px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider bg-slate-50;
+  }
+
+  .table-cell {
+    @apply px-4 py-3 text-sm text-slate-700 border-t border-slate-100;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Leaflet overrides */
+.leaflet-container {
+  border-radius: 0.75rem;
+  z-index: 1;
+}
