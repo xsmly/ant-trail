@@ -16,8 +16,7 @@ export function TopBar({ user }: { user: SessionPayload }) {
 
   async function handleLogout() {
     await fetch('/api/auth/logout', { method: 'POST' })
-    router.push('/login')
-    router.refresh()
+    window.location.href = '/login'
   }
 
   return (

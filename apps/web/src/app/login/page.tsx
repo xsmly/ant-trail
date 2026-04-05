@@ -35,8 +35,8 @@ export default function LoginPage() {
         return
       }
 
-      router.push('/dashboard')
-      router.refresh()
+      // Full page redirect to ensure the new cookie is read by server components
+      window.location.href = '/dashboard'
     } catch {
       setError('Gagal terhubung ke server')
     } finally {

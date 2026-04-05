@@ -2,7 +2,7 @@ import { SignJWT, jwtVerify } from 'jose'
 import { cookies } from 'next/headers'
 
 const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'ant-trail-demo-secret'
+  process.env.JWT_SECRET || 'ant-trail-demo-secret-key-change-in-production'
 )
 
 export interface SessionPayload {
